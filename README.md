@@ -7,6 +7,7 @@ them after deadlines.
 ## Solution
 Opportunity Finder brings scholarships, competitions,
 programs and other opportunities into one place.
+http://localhost:3000/index.html
 
 ## Technology
 HTML

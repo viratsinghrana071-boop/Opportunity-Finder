@@ -1,65 +1,103 @@
-/*
-  Opportunity Finder — homepage script
-  ------------------------------------
-  opportunities.js is loaded first, so the "opportunities" array
-  is already available here.
+import { fetchAllOpportunities } from "./data/opportunities.js";
 
-  index.html uses these ids:
-  - #opportunity-list  (the card container)
-  - #search-input      (the search box)
-  - #search-form       (so the page does not reload on Search)
-  - #category-list     (category buttons)
-  - #details-modal     (opportunity details popup)
-*/
+const PAGE_SIZE = 12;
 
-const opportunityContainer = document.getElementById("opportunity-list");
-const searchInput = document.getElementById("search-input");
-const searchForm = document.getElementById("search-form");
-const categoryLinks = document.querySelectorAll(".category-link");
-const detailsModal = document.getElementById("details-modal");
-const modalClose = document.getElementById("modal-close");
-const modalTitle = document.getElementById("modal-title");
-const modalOrganizer = document.getElementById("modal-organizer");
-const modalCategory = document.getElementById("modal-category");
-const modalDescription = document.getElementById("modal-description");
-const modalEligibility = document.getElementById("modal-eligibility");
-const modalDeadline = document.getElementById("modal-deadline");
-const modalLocation = document.getElementById("modal-location");
-const modalApply = document.getElementById("modal-apply");
+const classLabels = {
+  "9": "Grade 9",
+  "10": "Grade 10",
+  "11": "Grade 11",
+  "12": "Grade 12",
+  undergraduate: "Undergraduate",
+  postgraduate: "Postgraduate",
+  professional: "Early career",
+  open: "Open to all"
+};
 
-// The HTML uses plural names (scholarships). The data uses singular (scholarship).
 const categoryNames = {
   scholarships: "scholarship",
   competitions: "competition",
   programs: "program",
-  internships: "internship"
+  internships: "internship",
+  fellowships: "fellowship",
+  volunteer: "volunteer",
+  other: "other"
 };
 
-// Empty string means "show every category".
-let selectedCategory = "";
+let opportunities = [];
+let pageIndex = 0;
+
+function qs(name) {
+  return new URLSearchParams(location.search).get(name) || "";
+}
+
+function pageType() {
+  return document.body.getAttribute("data-page") || "home";
+}
 
 function formatDeadline(deadline) {
-  const date = new Date(deadline + "T00:00:00");
+  const date = new Date(String(deadline) + "T00:00:00");
+  if (Number.isNaN(date.getTime())) return deadline || "Rolling / open";
+  return date.toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+}
 
-  if (Number.isNaN(date.getTime())) {
-    return deadline;
+function labelClasses(item) {
+  const levels = item.classLevels?.length ? item.classLevels : [item.classLevel || "open"];
+  return levels.map((level) => classLabels[level] || level).join(" · ");
+}
+
+function matchesClass(item, classLevel) {
+  if (!classLevel) return true;
+  const levels = item.classLevels?.length ? item.classLevels : [item.classLevel];
+  if (levels.includes(classLevel) || levels.includes("open")) return true;
+  if (classLevel === "high-school") {
+    return ["9", "10", "11", "12", "open"].some((g) => levels.includes(g));
   }
+  if (classLevel === "university") {
+    return ["undergraduate", "postgraduate", "open"].some((g) => levels.includes(g));
+  }
+  return false;
+}
 
-  return date.toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric"
-  });
+function el(id) {
+  return document.getElementById(id);
 }
 
 function createOpportunityCard(opportunity) {
   const card = document.createElement("article");
-  card.className = "opportunity-card";
+  card.className = "opportunity-card" + (opportunity.expired ? " is-expired" : "");
+
+  if (opportunity.image) {
+    const media = document.createElement("div");
+    media.className = "opportunity-media";
+    const img = document.createElement("img");
+    img.src = opportunity.image;
+    img.alt = "";
+    img.loading = "lazy";
+    media.appendChild(img);
+    card.appendChild(media);
+  }
+
+  const tags = document.createElement("div");
+  tags.className = "card-tags";
 
   const category = document.createElement("span");
   category.className = "opportunity-tag";
   category.textContent = opportunity.category;
-  card.appendChild(category);
+  tags.appendChild(category);
+
+  const source = document.createElement("span");
+  source.className = "source-pill";
+  source.textContent = opportunity.source || "Live";
+  tags.appendChild(source);
+
+  if (opportunity.expired) {
+    const expired = document.createElement("span");
+    expired.className = "status-badge";
+    expired.textContent = "Deadline hit";
+    tags.appendChild(expired);
+  }
+
+  card.appendChild(tags);
 
   const title = document.createElement("h3");
   title.className = "opportunity-title";
@@ -67,7 +105,8 @@ function createOpportunityCard(opportunity) {
   card.appendChild(title);
 
   const organizer = document.createElement("p");
-  organizer.textContent = "Organizer: " + opportunity.organizer;
+  organizer.className = "opportunity-organizer";
+  organizer.textContent = opportunity.organizer;
   card.appendChild(organizer);
 
   const description = document.createElement("p");
@@ -75,212 +114,291 @@ function createOpportunityCard(opportunity) {
   description.textContent = opportunity.description;
   card.appendChild(description);
 
-  const eligibility = document.createElement("p");
-  eligibility.textContent = "Eligibility: " + opportunity.eligibility;
-  card.appendChild(eligibility);
+  const meta = document.createElement("div");
+  meta.className = "card-meta";
+  meta.innerHTML =
+    "<span>" + (opportunity.country || "Worldwide") + "</span>" +
+    "<span>" + (opportunity.format || "online") + "</span>" +
+    "<span>" + labelClasses(opportunity) + "</span>";
+  card.appendChild(meta);
 
   const deadline = document.createElement("p");
   deadline.className = "opportunity-deadline";
-  deadline.textContent = "Deadline: " + formatDeadline(opportunity.deadline);
+  deadline.textContent = opportunity.expired
+    ? "Expired: " + formatDeadline(opportunity.deadline)
+    : "Deadline: " + formatDeadline(opportunity.deadline);
   card.appendChild(deadline);
-
-  const location = document.createElement("p");
-  location.textContent = "Location: " + opportunity.location;
-  card.appendChild(location);
 
   const detailsButton = document.createElement("button");
   detailsButton.type = "button";
   detailsButton.className = "opportunity-link";
-  detailsButton.textContent = "View Details";
-  detailsButton.setAttribute("data-id", opportunity.id);
-  detailsButton.addEventListener("click", function () {
-    openDetailsModal(opportunity.id);
-  });
+  detailsButton.textContent = opportunity.expired ? "View anyway" : "View details";
+  detailsButton.addEventListener("click", () => openDetailsModal(opportunity.id));
   card.appendChild(detailsButton);
 
   return card;
 }
 
 function findOpportunityById(id) {
-  for (let i = 0; i < opportunities.length; i++) {
-    if (opportunities[i].id === id) {
-      return opportunities[i];
-    }
-  }
-
-  return null;
+  return opportunities.find((item) => String(item.id) === String(id)) || null;
 }
 
 function openDetailsModal(id) {
   const opportunity = findOpportunityById(id);
+  const detailsModal = el("details-modal");
+  if (!opportunity || !detailsModal) return;
 
-  if (!opportunity || !detailsModal) {
-    return;
+  el("modal-title").textContent = opportunity.title;
+  el("modal-organizer").textContent = "Organizer: " + opportunity.organizer;
+  el("modal-category").textContent = opportunity.category;
+  el("modal-description").textContent = opportunity.description;
+  el("modal-eligibility").textContent = "Eligibility: " + opportunity.eligibility;
+  el("modal-deadline").textContent = (opportunity.expired ? "Deadline hit: " : "Deadline: ") + formatDeadline(opportunity.deadline);
+  el("modal-location").textContent = "Location: " + opportunity.location;
+  if (el("modal-country")) el("modal-country").textContent = "Country: " + (opportunity.country || "Worldwide");
+  if (el("modal-class")) el("modal-class").textContent = "Who can apply: " + labelClasses(opportunity);
+  if (el("modal-source")) el("modal-source").textContent = "Live source: " + (opportunity.source || "Feed");
+  if (el("modal-status")) {
+    el("modal-status").hidden = !opportunity.expired;
+    el("modal-status").textContent = "Deadline hit · stays 2 days";
   }
-
-  modalTitle.textContent = opportunity.title;
-  modalOrganizer.textContent = "Organizer: " + opportunity.organizer;
-  modalCategory.textContent = opportunity.category;
-  modalDescription.textContent = opportunity.description;
-  modalEligibility.textContent = "Eligibility: " + opportunity.eligibility;
-  modalDeadline.textContent = "Deadline: " + formatDeadline(opportunity.deadline);
-  modalLocation.textContent = "Location: " + opportunity.location;
-  modalApply.href = opportunity.officialUrl;
+  el("modal-apply").href = opportunity.officialUrl;
 
   detailsModal.hidden = false;
   document.body.classList.add("modal-open");
 }
 
 function closeDetailsModal() {
-  if (!detailsModal) {
-    return;
-  }
-
+  const detailsModal = el("details-modal");
+  if (!detailsModal) return;
   detailsModal.hidden = true;
   document.body.classList.remove("modal-open");
 }
 
-function showNoResultsMessage(searchText) {
-  const message = document.createElement("p");
-  message.className = "about-text";
-
-  if (searchText !== "" && selectedCategory !== "") {
-    message.textContent =
-      'No ' +
-      selectedCategory +
-      ' opportunities match "' +
-      searchText +
-      '". Try another word.';
-  } else if (searchText !== "") {
-    message.textContent =
-      'No opportunities match "' +
-      searchText +
-      '". Try another word, such as scholarship, internship, or the organizer name.';
-  } else if (selectedCategory !== "") {
-    message.textContent =
-      "No " + selectedCategory + " opportunities are available right now.";
-  } else {
-    message.textContent = "No opportunities match your filters.";
-  }
-
-  opportunityContainer.appendChild(message);
+function currentFilters() {
+  const presetCategory = document.body.getAttribute("data-category") || qs("type");
+  const presetClass = document.body.getAttribute("data-class") || qs("class");
+  const presetStatus = document.body.getAttribute("data-status") || qs("status");
+  return {
+    search: el("search-input")?.value.trim() || qs("q"),
+    category: el("filter-category")?.value || presetCategory,
+    country: el("filter-country")?.value || "",
+    classLevel: el("filter-class")?.value || presetClass,
+    format: el("filter-format")?.value || "",
+    region: el("filter-region")?.value || "",
+    status: el("filter-status")?.value || presetStatus || "all",
+    window: el("filter-window")?.value || ""
+  };
 }
 
-function displayOpportunities(list, searchText) {
-  opportunityContainer.innerHTML = "";
-
-  if (list.length === 0) {
-    showNoResultsMessage(searchText);
-    return;
-  }
-
-  for (let i = 0; i < list.length; i++) {
-    const card = createOpportunityCard(list[i]);
-    opportunityContainer.appendChild(card);
-  }
-}
-
-function matchesSearch(opportunity, searchText) {
-  const text = searchText.toLowerCase();
-
-  const title = opportunity.title.toLowerCase();
-  const category = opportunity.category.toLowerCase();
-  const organizer = opportunity.organizer.toLowerCase();
-  const description = opportunity.description.toLowerCase();
-
-  return (
-    title.indexOf(text) !== -1 ||
-    category.indexOf(text) !== -1 ||
-    organizer.indexOf(text) !== -1 ||
-    description.indexOf(text) !== -1
-  );
-}
-
-function matchesCategory(opportunity) {
-  if (selectedCategory === "") {
-    return true;
-  }
-
-  return opportunity.category === selectedCategory;
+function withinWindow(item, window) {
+  if (!window) return true;
+  const date = new Date(String(item.deadline) + "T00:00:00");
+  if (Number.isNaN(date.getTime())) return true;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const diff = (date - today) / (24 * 60 * 60 * 1000);
+  if (window === "week") return diff >= 0 && diff <= 7;
+  if (window === "month") return diff >= 0 && diff <= 30;
+  if (window === "later") return diff > 30;
+  return true;
 }
 
 function getVisibleOpportunities() {
-  const searchText = searchInput ? searchInput.value.trim() : "";
-  const matches = [];
+  const filters = currentFilters();
+  const page = pageType();
 
-  for (let i = 0; i < opportunities.length; i++) {
-    const item = opportunities[i];
-    const categoryOk = matchesCategory(item);
-    const searchOk = searchText === "" || matchesSearch(item, searchText);
-
-    if (categoryOk && searchOk) {
-      matches.push(item);
+  return opportunities.filter((item) => {
+    if (page === "home") return !item.expired;
+    if (page === "high-school") {
+      const ok = matchesClass(item, "high-school");
+      if (!ok) return false;
     }
-  }
+    if (page === "university") {
+      if (!matchesClass(item, "university")) return false;
+    }
+    if (page === "expired" && !item.expired) return false;
 
-  return matches;
+    const searchOk = !filters.search || [
+      item.title, item.category, item.organizer, item.description,
+      item.location, item.country, item.eligibility, item.source
+    ].join(" ").toLowerCase().includes(filters.search.toLowerCase());
+
+    const mapped = categoryNames[filters.category] || filters.category;
+    const categoryOk = !mapped || item.category === mapped;
+    const countryOk = !filters.country || item.country === filters.country;
+    const classOk = matchesClass(item, filters.classLevel);
+    const formatOk = !filters.format || item.format === filters.format;
+    const regionOk = !filters.region || item.region === filters.region;
+    const statusOk =
+      filters.status === "expired" ? item.expired :
+      filters.status === "open" ? !item.expired : true;
+    const windowOk = withinWindow(item, filters.window);
+
+    return searchOk && categoryOk && countryOk && classOk && formatOk && regionOk && statusOk && windowOk;
+  });
+}
+
+function fillSelect(select, values, label) {
+  if (!select) return;
+  const current = select.value;
+  select.innerHTML = '<option value="">' + label + "</option>";
+  values.forEach((value) => {
+    const option = document.createElement("option");
+    option.value = value;
+    option.textContent = value;
+    select.appendChild(option);
+  });
+  if ([...select.options].some((opt) => opt.value === current)) select.value = current;
+}
+
+function fillFilters() {
+  fillSelect(el("filter-country"), [...new Set(opportunities.map((i) => i.country).filter(Boolean))].sort(), "All countries");
+  fillSelect(el("filter-region"), [...new Set(opportunities.map((i) => i.region).filter(Boolean))].sort(), "All regions");
+  const presetCategory = document.body.getAttribute("data-category") || qs("type");
+  const presetClass = document.body.getAttribute("data-class") || qs("class");
+  const presetStatus = document.body.getAttribute("data-status");
+  if (el("filter-category") && presetCategory) el("filter-category").value = categoryNames[presetCategory] || presetCategory;
+  if (el("filter-class") && presetClass) el("filter-class").value = presetClass;
+  if (el("filter-status") && presetStatus) el("filter-status").value = presetStatus;
+  if (el("search-input") && qs("q")) el("search-input").value = qs("q");
+}
+
+function updateStats() {
+  const open = opportunities.filter((item) => !item.expired).length;
+  const expired = opportunities.filter((item) => item.expired).length;
+  const countries = new Set(opportunities.map((item) => item.country).filter(Boolean));
+  if (el("stat-open")) el("stat-open").textContent = String(open);
+  if (el("stat-expired")) el("stat-expired").textContent = String(expired);
+  if (el("stat-countries")) el("stat-countries").textContent = String(countries.size);
+}
+
+function renderPager(total) {
+  const pager = el("pager");
+  if (!pager) return;
+  const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  pageIndex = Math.min(pageIndex, pages - 1);
+  pager.innerHTML = "";
+  if (pages <= 1) return;
+
+  const prev = document.createElement("button");
+  prev.type = "button";
+  prev.className = "ghost-button";
+  prev.textContent = "Previous";
+  prev.disabled = pageIndex === 0;
+  prev.addEventListener("click", () => { pageIndex -= 1; updateDisplay(); });
+
+  const info = document.createElement("span");
+  info.className = "pager-info";
+  info.textContent = "Page " + (pageIndex + 1) + " of " + pages;
+
+  const next = document.createElement("button");
+  next.type = "button";
+  next.className = "ghost-button";
+  next.textContent = "Next";
+  next.disabled = pageIndex >= pages - 1;
+  next.addEventListener("click", () => { pageIndex += 1; updateDisplay(); });
+
+  pager.append(prev, info, next);
 }
 
 function updateDisplay() {
-  const searchText = searchInput ? searchInput.value.trim() : "";
-  displayOpportunities(getVisibleOpportunities(), searchText);
-}
+  const list = el("opportunity-list");
+  if (!list) return;
+  const visible = getVisibleOpportunities();
+  const page = pageType();
+  const slice = page === "home" ? visible.slice(0, 6) : visible.slice(pageIndex * PAGE_SIZE, pageIndex * PAGE_SIZE + PAGE_SIZE);
 
-function handleSearch() {
-  updateDisplay();
-}
+  list.innerHTML = "";
+  if (!slice.length) {
+    const message = document.createElement("p");
+    message.className = "about-text";
+    message.textContent = "No live opportunities match these filters right now. Clear filters or try another page.";
+    list.appendChild(message);
+  } else {
+    slice.forEach((item) => list.appendChild(createOpportunityCard(item)));
+  }  
 
-function getCategoryFromCard(card) {
-  const htmlValue = card.getAttribute("data-category");
-
-  if (categoryNames[htmlValue]) {
-    return categoryNames[htmlValue];
+  if (el("results-meta")) {
+    const stamp = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    el("results-meta").textContent = visible.length + " live listings · updated " + stamp + " · expired cards stay 2 days";
   }
 
-  return htmlValue;
+  renderPager(page === "home" ? 1 : visible.length);
+  document.querySelectorAll(".category-card").forEach((card) => {
+    const value = categoryNames[card.getAttribute("data-category")] || card.getAttribute("data-category") || "";
+    card.classList.toggle("is-active", value === currentFilters().category);
+  });
 }
 
-function handleCategoryClick(card) {
-  selectedCategory = getCategoryFromCard(card);
+async function loadOpportunities() {
+  if (el("results-meta")) el("results-meta").textContent = "Fetching live worldwide listings…";
+  try {
+    opportunities = await fetchAllOpportunities();
+  } catch (error) {
+    opportunities = [];
+    if (el("results-meta")) el("results-meta").textContent = "Live APIs are unreachable. Start the site with npm start.";
+  }
+  updateStats();
+  fillFilters();
   updateDisplay();
 }
 
-if (opportunityContainer && typeof opportunities !== "undefined") {
-  updateDisplay();
-}
-
-if (searchInput) {
-  searchInput.addEventListener("input", handleSearch);
-}
-
-if (searchForm) {
-  searchForm.addEventListener("submit", function (event) {
+function bindFilters() {
+  ["filter-category", "filter-country", "filter-class", "filter-format", "filter-region", "filter-status", "filter-window"].forEach((id) => {
+    el(id)?.addEventListener("change", () => { pageIndex = 0; updateDisplay(); });
+  });
+  el("search-input")?.addEventListener("input", () => { pageIndex = 0; updateDisplay(); });
+  el("search-form")?.addEventListener("submit", (event) => {
     event.preventDefault();
-    handleSearch();
-  });
-}
-
-for (let i = 0; i < categoryLinks.length; i++) {
-  categoryLinks[i].addEventListener("click", function () {
-    const card = categoryLinks[i].parentElement;
-    handleCategoryClick(card);
-  });
-}
-
-if (modalClose) {
-  modalClose.addEventListener("click", closeDetailsModal);
-}
-
-if (detailsModal) {
-  detailsModal.addEventListener("click", function (event) {
-    if (event.target === detailsModal) {
-      closeDetailsModal();
+    const q = el("search-input")?.value.trim();
+    if (pageType() === "home" && q) {
+      location.href = "browse.html?q=" + encodeURIComponent(q);
+      return;
     }
+    pageIndex = 0;
+    updateDisplay();
+  });
+  el("clear-filters")?.addEventListener("click", () => {
+    ["filter-category", "filter-country", "filter-class", "filter-format", "filter-region", "filter-status", "filter-window"].forEach((id) => {
+      if (el(id) && !document.body.getAttribute("data-category") && !document.body.getAttribute("data-class") && !document.body.getAttribute("data-status")) {
+        el(id).value = "";
+      } else if (el(id) && !["filter-category", "filter-class", "filter-status"].includes(id)) {
+        el(id).value = "";
+      }
+    });
+    if (el("search-input")) el("search-input").value = "";
+    pageIndex = 0;
+    updateDisplay();
+  });
+  el("refresh-button")?.addEventListener("click", loadOpportunities);
+  el("modal-close")?.addEventListener("click", closeDetailsModal);
+  el("details-modal")?.addEventListener("click", (event) => {
+    if (event.target === el("details-modal")) closeDetailsModal();
+  });
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") closeDetailsModal();
   });
 }
 
-document.addEventListener("keydown", function (event) {
-  if (event.key === "Escape") {
-    closeDetailsModal();
-  }
-});
+function setActiveNav() {
+  const page = pageType();
+  document.querySelectorAll(".nav-link").forEach((link) => {
+    const href = link.getAttribute("href") || "";
+    const isActive =
+      (page === "home" && href === "index.html") ||
+      (page === "browse" && href === "browse.html") ||
+      (page === "high-school" && href === "high-school.html") ||
+      (page === "university" && href === "university.html") ||
+      (page === "expired" && href === "expired.html") ||
+      (page === "about" && href === "about.html");
+    link.classList.toggle("is-current", isActive);
+  });
+}
+
+setActiveNav();
+bindFilters();
+if (el("opportunity-list")) {
+  loadOpportunities();
+  setInterval(loadOpportunities, 5 * 60 * 1000);
+}

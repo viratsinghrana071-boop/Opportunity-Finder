@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About Opportunity Finder</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body data-page="about">
+  <header class="site-header">
+    <nav class="navbar" aria-label="Main navigation">
+      <a href="index.html" class="logo">
+        <img src="assets/logo/logo.png" alt="" class="logo-mark">
+        Opportunity Finder
+      </a>
+      <ul class="nav-links">
+        <li><a href="index.html" class="nav-link">Home</a></li>
+        <li><a href="browse.html" class="nav-link">Browse all</a></li>
+        <li><a href="high-school.html" class="nav-link">Grades 9–12</a></li>
+        <li><a href="university.html" class="nav-link">University+</a></li>
+        <li><a href="expired.html" class="nav-link">Just expired</a></li>
+        <li><a href="about.html" class="nav-link">About</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main class="page-shell about">
+    <h1 class="section-title">How the live board works</h1>
+    <p class="about-text">
+      Opportunity Finder is built so students do not miss openings because they found them too late.
+      The site pulls real listings from public live APIs and feeds: Devpost hackathons, Codeforces contests,
+      RemoteOK, Arbeitnow, Remotive, The Muse, USAJobs student internships, ReliefWeb jobs and training,
+      plus scholarship and youth opportunity RSS feeds.
+    </p>
+    <p class="about-text">
+      New items show up on the next refresh (about every 10 minutes on the server, and every 5 minutes in the browser).
+      When a deadline passes, the card is marked “Deadline hit” and stays for two days. After that it is removed.
+    </p>
+    <p class="about-text">
+      Use <a href="high-school.html">Grades 9–12</a> if you are in school, <a href="university.html">University+</a>
+      if you are older, or <a href="browse.html">Browse all</a> to filter by type, country, region, format, and deadline window.
+    </p>
+  </main>
+
+  <footer class="site-footer">
+    <p class="footer-text">&copy; 2026 Opportunity Finder. Built for students worldwide.</p>
+  </footer>
+
+  <script type="module" src="script.js"></script>
+</body>
+</html>

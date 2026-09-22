@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>University+ opportunities</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body data-page="university" data-class="university">
+  <header class="site-header">
+    <nav class="navbar" aria-label="Main navigation">
+      <a href="index.html" class="logo">
+        <img src="assets/logo/logo.png" alt="" class="logo-mark">
+        Opportunity Finder
+      </a>
+      <ul class="nav-links">
+        <li><a href="index.html" class="nav-link">Home</a></li>
+        <li><a href="browse.html" class="nav-link">Browse all</a></li>
+        <li><a href="high-school.html" class="nav-link">Grades 9–12</a></li>
+        <li><a href="university.html" class="nav-link">University+</a></li>
+        <li><a href="expired.html" class="nav-link">Just expired</a></li>
+        <li><a href="about.html" class="nav-link">About</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main class="page-shell">
+    <header class="page-hero">
+      <p class="hero-kicker"><span class="live-dot"></span> University & early career board</p>
+      <h1>Internships, fellowships, research, and scholarships.</h1>
+      <p>For students beyond school — undergraduate, postgraduate, and young professionals. Narrow by exact level with the filters.</p>
+    </header>
+    <div class="browse-layout">
+      <aside class="filter-panel">
+        <h2>Filters</h2>
+        <label class="filter-field"><span>Search</span><input type="search" id="search-input" class="filter-input" placeholder="Search"></label>
+        <label class="filter-field">
+          <span>Level</span>
+          <select id="filter-class">
+            <option value="university">University + open</option>
+            <option value="undergraduate">Undergraduate</option>
+            <option value="postgraduate">Postgraduate</option>
+            <option value="professional">Early career</option>
+            <option value="open">Open to all</option>
+          </select>
+        </label>
+        <label class="filter-field">
+          <span>Type</span>
+          <select id="filter-category">
+            <option value="">All types</option>
+            <option value="scholarship">Scholarships</option>
+            <option value="competition">Competitions</option>
+            <option value="program">Programs</option>
+            <option value="internship">Internships</option>
+            <option value="fellowship">Fellowships</option>
+            <option value="volunteer">Volunteer</option>
+            <option value="other">Other</option>
+          </select>
+        </label>
+        <label class="filter-field"><span>Country</span><select id="filter-country"><option value="">All countries</option></select></label>
+        <label class="filter-field"><span>Region</span><select id="filter-region"><option value="">All regions</option></select></label>
+        <label class="filter-field">
+          <span>Format</span>
+          <select id="filter-format">
+            <option value="">Any format</option>
+            <option value="online">Online</option>
+            <option value="in-person">In person</option>
+            <option value="hybrid">Hybrid</option>
+          </select>
+        </label>
+        <button type="button" class="ghost-button" id="clear-filters">Clear extra filters</button>
+      </aside>
+      <section class="opportunities browse-results">
+        <p class="section-subtitle" id="results-meta">Loading…</p>
+        <form id="search-form" hidden></form>
+        <div id="opportunity-list" class="opportunity-list"></div>
+        <div class="pager" id="pager"></div>
+      </section>
+    </div>
+  </main>
+  <footer class="site-footer"><p class="footer-text">&copy; 2026 Opportunity Finder.</p></footer>
+  <div class="modal-overlay" id="details-modal" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <button type="button" class="modal-close" id="modal-close" aria-label="Close details">&times;</button>
+      <span class="opportunity-tag" id="modal-category"></span>
+      <span class="status-badge" id="modal-status" hidden>Deadline hit</span>
+      <h2 class="modal-title" id="modal-title"></h2>
+      <p class="modal-organizer" id="modal-organizer"></p>
+      <p class="modal-description" id="modal-description"></p>
+      <p class="modal-eligibility" id="modal-eligibility"></p>
+      <p class="modal-deadline" id="modal-deadline"></p>
+      <p class="modal-location" id="modal-location"></p>
+      <p class="modal-country" id="modal-country"></p>
+      <p class="modal-class" id="modal-class"></p>
+      <p class="modal-source" id="modal-source"></p>
+      <a class="modal-apply" id="modal-apply" href="#" target="_blank" rel="noopener noreferrer">Official application</a>
+    </div>
+  </div>
+  <script type="module" src="script.js"></script>
+</body>
+</html>

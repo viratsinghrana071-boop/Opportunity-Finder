@@ -4,126 +4,117 @@
   <meta charset="UTF-8">
   <meta name="google-site-verification" content="WSfLYXz-C9leCiZ4sHVCbR6cygWX222nq7RFwsDVyRY" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Opportunity Finder(Made by Virat Singh)</title>
+  <title>Opportunity Finder — Live worldwide openings</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
-<body>
-  <header class="site-header" id="site-header">
-    <nav class="navbar" id="navbar" aria-label="Main navigation">
-      <a href="index.html" class="logo" id="logo">
-  <img
-    src="assets/logo/logo.png"
-    alt="Opportunity Finder"
-    style="width: 40px; height: 40px; object-fit: contain; vertical-align: middle;"
-  >
-  Opportunity Finder
-</a>
-      <ul class="nav-links" id="nav-links">
+<body data-page="home">
+  <header class="site-header">
+    <nav class="navbar" aria-label="Main navigation">
+      <a href="index.html" class="logo">
+        <img src="assets/logo/logo.png" alt="" class="logo-mark">
+        Opportunity Finder
+      </a>
+      <ul class="nav-links">
         <li><a href="index.html" class="nav-link">Home</a></li>
-        <li><a href="#opportunities" class="nav-link">Opportunities</a></li>
-        <li><a href="#categories" class="nav-link">Categories</a></li>
-        <li><a href="#about" class="nav-link">About</a></li>
+        <li><a href="browse.html" class="nav-link">Browse all</a></li>
+        <li><a href="high-school.html" class="nav-link">Grades 9–12</a></li>
+        <li><a href="university.html" class="nav-link">University+</a></li>
+        <li><a href="expired.html" class="nav-link">Just expired</a></li>
+        <li><a href="about.html" class="nav-link">About</a></li>
       </ul>
     </nav>
   </header>
 
-  <main id="main-content">
-    <section class="hero" id="hero">
-      <h1 class="hero-title">Find Opportunities. Don't Miss Them.</h1>
+  <main>
+    <section class="hero">
+      <p class="hero-kicker"><span class="live-dot" aria-hidden="true"></span> Live APIs · worldwide</p>
+      <h1 class="hero-title">Real openings, pulled as they are published.</h1>
       <p class="hero-description">
-        Discover scholarships, competitions, programs, internships, and other
-        student opportunities in one place — and apply before the deadline.
+        Hackathons, contests, internships, scholarships, and programs from live sources.
+        After a deadline hits, a listing stays two days as expired, then it is removed automatically.
       </p>
-      <form class="search-form" id="search-form" role="search">
+      <form class="search-form" id="search-form" role="search" action="browse.html">
         <label for="search-input" class="search-label">Search opportunities</label>
-        <input
-          type="search"
-          id="search-input"
-          class="search-input"
-          name="q"
-          placeholder="Search scholarships, competitions, internships..."
-          autocomplete="off"
-        >
-        <button type="submit" class="search-button" id="search-button">Search</button>
+        <input type="search" id="search-input" class="search-input" name="q" placeholder="Search title, country, organizer..." autocomplete="off">
+        <button type="submit" class="search-button">Search the live board</button>
       </form>
-    </section>
-
-    <section class="categories" id="categories">
-      <h2 class="section-title">Categories</h2>
-      <ul class="category-list" id="category-list">
-        <li class="category-card" data-category="scholarships">
-          <img src="assets/images/scholarships/scholarship.jpg" alt="Scholarships">
-          <a href="#opportunities" class="category-link">Scholarships</a>
-        </li>
-
-        <li class="category-card" data-category="competitions">
-          <img src="assets/images/competitions/competition.jpg" alt="Competitions">
-          <a href="#opportunities" class="category-link">Competitions</a>
-        </li>
-
-        <li class="category-card" data-category="programs">
-          <img src="assets/images/programs/program.jpg" alt="Programs">
-          <a href="#opportunities" class="category-link">Programs</a>
-        </li>
-
-        <li class="category-card" data-category="internships">
-          <img src="assets/images/internships/internship.jpg" alt="Internships">
-          <a href="#opportunities" class="category-link">Internships</a>
-        </li>
-      </ul>
-    </section>
-
-    <section class="opportunities" id="opportunities">
-      <h2 class="section-title">Featured Opportunities</h2>
-      <div id="opportunity-list" class="opportunity-list">
-        <!-- Opportunity cards will be inserted here by JavaScript -->
+      <div class="hero-stats">
+        <div><strong id="stat-open">0</strong><span>Open now</span></div>
+        <div><strong id="stat-expired">0</strong><span>Just expired</span></div>
+        <div><strong id="stat-countries">0</strong><span>Countries</span></div>
       </div>
     </section>
 
-    <section class="about" id="about">
-      <h2 class="section-title">About</h2>
-      <p class="about-text">
-        Opportunity Finder helps students find scholarships, competitions,
-        programs, and internships before they close. Browse by category or
-        search by name so you can plan ahead and apply on time.
-      </p>
+    <section class="audience">
+      <h2 class="section-title">Start where you are</h2>
+      <div class="audience-grid">
+        <a class="audience-card" href="high-school.html">
+          <span>School</span>
+          <strong>Grades 9, 10, 11, 12</strong>
+          <p>Olympiads, contests, high-school internships, and youth programs.</p>
+        </a>
+        <a class="audience-card" href="university.html">
+          <span>After school</span>
+          <strong>University and early career</strong>
+          <p>Internships, fellowships, research, and graduate scholarships.</p>
+        </a>
+        <a class="audience-card" href="browse.html">
+          <span>Everyone</span>
+          <strong>Open to all ages</strong>
+          <p>The full live board with filters for type, country, format, and deadline.</p>
+        </a>
+      </div>
+    </section>
+
+    <section class="categories" id="categories">
+      <h2 class="section-title">Browse by type</h2>
+      <ul class="category-list">
+        <li class="category-card"><a href="browse.html" class="category-link">All live</a></li>
+        <li class="category-card" data-category="scholarships"><a href="browse.html?type=scholarship" class="category-link">Scholarships</a></li>
+        <li class="category-card" data-category="competitions"><a href="browse.html?type=competition" class="category-link">Competitions</a></li>
+        <li class="category-card" data-category="internships"><a href="browse.html?type=internship" class="category-link">Internships</a></li>
+        <li class="category-card" data-category="programs"><a href="browse.html?type=program" class="category-link">Programs</a></li>
+        <li class="category-card" data-category="fellowships"><a href="browse.html?type=fellowship" class="category-link">Fellowships</a></li>
+      </ul>
+    </section>
+
+    <section class="opportunities">
+      <div class="section-heading">
+        <div>
+          <h2 class="section-title">Open right now</h2>
+          <p class="section-subtitle" id="results-meta">Loading live listings…</p>
+        </div>
+        <a class="ghost-button" href="browse.html">See full board</a>
+      </div>
+      <div id="opportunity-list" class="opportunity-list"></div>
     </section>
   </main>
 
-  <footer class="site-footer" id="site-footer">
-    <p class="footer-text">&copy; 2026 Opportunity Finder. Built for students.</p>
+  <footer class="site-footer">
+    <p class="footer-text">&copy; 2026 Opportunity Finder. Live listings refresh every few minutes.</p>
   </footer>
 
   <div class="modal-overlay" id="details-modal" hidden>
-    <div
-      class="modal"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="modal-title"
-    >
-      <button type="button" class="modal-close" id="modal-close" aria-label="Close details">
-        &times;
-      </button>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <button type="button" class="modal-close" id="modal-close" aria-label="Close details">&times;</button>
       <span class="opportunity-tag" id="modal-category"></span>
+      <span class="status-badge" id="modal-status" hidden>Deadline hit</span>
       <h2 class="modal-title" id="modal-title"></h2>
       <p class="modal-organizer" id="modal-organizer"></p>
       <p class="modal-description" id="modal-description"></p>
       <p class="modal-eligibility" id="modal-eligibility"></p>
       <p class="modal-deadline" id="modal-deadline"></p>
       <p class="modal-location" id="modal-location"></p>
-      <a
-        class="modal-apply"
-        id="modal-apply"
-        href="#"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        Official Application
-      </a>
+      <p class="modal-country" id="modal-country"></p>
+      <p class="modal-class" id="modal-class"></p>
+      <p class="modal-source" id="modal-source"></p>
+      <a class="modal-apply" id="modal-apply" href="#" target="_blank" rel="noopener noreferrer">Official application</a>
     </div>
   </div>
 
-  <script src="data/opportunities.js"></script>
-  <script src="script.js"></script>
+  <script type="module" src="script.js"></script>
 </body>
 </html>
