@@ -1,0 +1,18 @@
+# Ignore node modules
+node_modules/
+
+# Ignore build and cache files
+dist/
+build/
+.cache/
+
+# Ignore logs
+*.log
+
+# Ignore OS/system files
+.DS_Store
+Thumbs.db
+
+# Ignore downloaded or inspection junk
+*.download
+assets/logo/URL Inspection*
