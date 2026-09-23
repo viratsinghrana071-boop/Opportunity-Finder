@@ -3,7 +3,7 @@
 // Fetch all opportunities from backend
 export async function fetchAllOpportunities() {
   try {
-    const res = await fetch("http://localhost:3000/api/opportunities");
+    const res = await fetch("https://opportunity-finder-7zgx.onrender.com/api/opportunities");
     const payload = await res.json();
 
     // Map backend data into frontend-friendly objects
