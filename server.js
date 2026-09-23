@@ -1,4 +1,5 @@
 import express from "express";
+import cors from "cors";
 import fetch from "node-fetch";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -13,7 +14,7 @@ const UA = "OpportunityFinder/1.0 (https://localhost; student opportunity aggreg
 const cache = { all: { at: 0, data: [] } };
 
 app.use(express.static(__dirname));
-
+app.use(cors());
 function stripHtml(value) {
   return String(value || "")
     .replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, "$1")
